@@ -60,7 +60,7 @@
         <div class="card" id="birthday-card">
             <h1 class="neon-text" style="color:#d81b60; font-size: 35px; text-shadow: none;">Happy Birthday! 🎂</h1>
             <img src="anh-cua-linh.jpg" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #ff69b4; margin: 15px auto; display: block;">
-            <div id="letter-content" style="text-align: left; margin: 15px 0; font-size: 15px; height: 120px; overflow-y: auto; color: #880e4f; border-top: 1px dashed #f06292; padding-top: 10px;"></div>
+            <div id="letter-content" style="text-align: left; margin: 15px 0; font-size: 15px; height: 120px; overflow-y: auto; color: #880e4f; border-top: 1px dashed #f06292; padding-top: 10px; scroll-behavior: smooth;"></div>
             <button class="btn" id="open-btn">Mở thư tay 💌</button>
             <button class="btn" id="show-heart-btn" style="display:none; background: #d81b60;">Xem ảnh bất ngờ ❤️</button>
         </div>
@@ -154,14 +154,15 @@
                     const text = "MÃI YÊU YẾN LINH "; const angleStep = (Math.PI * 2) / text.length;
                     hCtx.font = "bold 20px 'Courier New'"; hCtx.textAlign = "center";
                     for (let i = 0; i < text.length; i++) {
-                        let textAngle = i * angleStep + tick * 0.01;
+                        let textAngle = i * angleStep + tick * 0.02;
                         let tx = currentCX + Math.cos(textAngle) * 180; let ty = (currentCY + 180) + Math.sin(textAngle) * 60;
                         hCtx.fillStyle = `hsl(${(textAngle * 50) % 360}, 100%, 70%)`; hCtx.fillText(text[i], tx, ty);
                     }
                     hAnimationId = requestAnimationFrame(animateHeart);
                 }
                 animateHeart();
-                setTimeout(() => { cancelAnimationFrame(hAnimationId); hCanvas.style.transition = "opacity 1s"; hCanvas.style.opacity = 0; setTimeout(() => { hCanvas.style.display = 'none'; resolve(); }, 1000); }, 8000); 
+                // --- ĐÃ CHỈNH THỜI GIAN LÊN 15 GIÂY TẠI ĐÂY ---
+                setTimeout(() => { cancelAnimationFrame(hAnimationId); hCanvas.style.transition = "opacity 1s"; hCanvas.style.opacity = 0; setTimeout(() => { hCanvas.style.display = 'none'; resolve(); }, 1000); }, 15000); 
             });
         }
 
@@ -221,10 +222,13 @@
         document.getElementById('open-btn').onclick = function() {
             this.style.display = 'none';
             let i = 0;
+            const letterBox = document.getElementById('letter-content');
             const type = () => {
                 if(i < letter.length) {
-                    document.getElementById('letter-content').innerHTML += letter.charAt(i) === '\n' ? '<br>' : letter.charAt(i);
-                    i++; setTimeout(type, 40);
+                    letterBox.innerHTML += letter.charAt(i) === '\n' ? '<br>' : letter.charAt(i);
+                    // --- TỰ ĐỘNG CUỘN XUỐNG TẠI ĐÂY ---
+                    letterBox.scrollTop = letterBox.scrollHeight;
+                    i++; setTimeout(type, 50);
                 } else document.getElementById('show-heart-btn').style.display = 'inline-block';
             };
             type();
