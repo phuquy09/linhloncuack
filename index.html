@@ -3,203 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi Yến Linh</title>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <title>Gửi Yến Linh ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
     <style>
-        body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Arial', sans-serif; color: white; }
-        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; display: flex; justify-content: center; align-items: center; z-index: 200; cursor: pointer; }
-        #loader-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .loader { border: 5px solid #333; border-top: 5px solid #ff69b4; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #countdown-clock { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; text-align: center; z-index: 10; display: none; color: #ff69b4; text-shadow: 0 0 20px #ff69b4; font-family: 'Courier New', monospace; }
-        #center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: bold; z-index: 15; text-align: center; opacity: 0; color: #ff69b4; text-shadow: 0 0 20px #ff69b4; pointer-events: none; }
-        #final-screen, #heart-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fce4ec; flex-direction: column; justify-content: center; align-items: center; z-index: 20; opacity: 0; transition: opacity 1s; }
+        body { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Quicksand', sans-serif; color: white; cursor: crosshair; }
+        canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
         
-        /* CSS CARD VÀ ẢNH TRÒN */
-        .card { background: white; padding: 25px; border-radius: 20px; color: #880e4f; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 4px solid #f06292; max-width: 400px; width: 85%; text-align: center; transform: scale(0.8); transition: 0.6s; z-index: 25;}
-        .card.show { opacity: 1; transform: scale(1); }
-        .avatar-img {
-            width: 120px; height: 120px; border-radius: 50%; object-fit: cover; 
-            border: 3px solid #ff69b4; margin: 15px auto; display: block; 
-            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
-        }
+        #heart3d { z-index: 150; display: none; width: 100%; height: 100%; } /* Canvas cho trái tim hạt */
 
-        #letter-content { white-space: pre-wrap; text-align: left; height: 150px; overflow-y: auto; border-top: 1px dashed #f06292; padding-top: 10px; color: #880e4f; margin-top: 10px;}
-        .heart-grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 8px; }
-        .photo { width: 60px; height: 60px; border-radius: 8px; overflow: hidden; border: 2px solid #f06292; opacity: 0; transition: 0.5s; background: #eee; display: flex; align-items: center; justify-content: center; }
-        .photo img { width: 100%; height: 100%; object-fit: cover; }
-        .photo.reveal { opacity: 1; }
-        .empty { width: 60px; height: 60px; }
-        .btn { background: #f06292; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        #start-screen { position: fixed; inset: 0; background: black; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        
+        #loading-screen {
+            position: fixed; inset: 0; background: #0a000f; display: none; 
+            flex-direction: column; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .spinner {
+            border: 6px solid rgba(255, 105, 180, 0.2);
+            border-top: 6px solid #ff69b4;
+            border-radius: 50%;
+            width: 50px; height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .neon-text { font-family: 'Dancing Script', cursive; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ff69b4, 0 0 40px #ff69b4; animation: pulse 1.5s infinite alternate; text-align: center; }
+        @keyframes pulse { 100% { text-shadow: 0 0 5px #fff, 0 0 15px #fff, 0 0 30px #ff1493, 0 0 60px #ff1493; } }
+        
+        .age-text { background: linear-gradient(to right, #ff69b4, #fff, #ffeb3b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 100px !important; filter: drop-shadow(0 0 20px #ffeb3b); animation: zoom 2s infinite; font-family: 'Dancing Script', cursive; }
+        @keyframes zoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        #countdown-clock { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; z-index: 100; color: #ff69b4; font-family: 'Courier New', monospace; text-align: center; display: none; }
+        #center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 101; text-align: center; opacity: 0; width: 100%; transition: 0.5s; }
+        
+        #final-screen { display: none; position: fixed; inset: 0; background: #0a000f; z-index: 200; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 2s; }
+        .card { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 30px; color: #880e4f; box-shadow: 0 0 30px #ff69b4; text-align: center; width: 380px; transform: scale(0.5); transition: 1s; }
+        .card.show { transform: scale(1); }
+        
+        .btn { background: #f06292; color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 20px; font-family: 'Quicksand'; transition: 0.3s; }
+        .btn:hover { background: #d81b60; transform: scale(1.05); }
+
+        .heart-grid { display: grid; grid-template-columns: repeat(5, 75px); gap: 10px; margin-top: 20px; }
+        .photo-slot { width: 75px; height: 75px; border-radius: 12px; overflow: hidden; border: 2px solid #ff69b4; opacity: 0; transform: scale(0); transition: 0.5s; }
+        .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-slot.reveal { opacity: 1; transform: scale(1); }
+        
+        .sparkle { position: absolute; width: 6px; height: 6px; background: #ff69b4; border-radius: 50%; pointer-events: none; z-index: 10000; animation: fadeOut 1s forwards; }
+        @keyframes fadeOut { 100% { transform: scale(0); opacity: 0; } }
     </style>
 </head>
 <body>
-    <div id="start-screen"><div class="btn" style="font-size: 20px;">🌸 Chạm để bắt đầu hành trình dành riêng cho Yến Linh 🌸</div></div>
-    <div id="loader-wrapper"><div class="loader"></div><div style="color:#ff69b4; margin-top:10px;">LOADING...</div></div>
-    <div id="countdown-clock"><div style="font-size: 24px; margin-bottom: 10px;">Ngày 30/01/2026</div><div id="clock-display">23:59:55</div></div>
+
+    <div id="start-screen">
+        <h1 class="neon-text" style="font-size: 50px;">Chào Yến Linh... ✨</h1>
+        <button class="btn" id="start-btn" style="font-size: 24px;">🌸 NHẤN ĐỂ KHÁM PHÁ BÍ MẬT 🌸</button>
+    </div>
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p class="neon-text" style="font-size: 20px;">Đang chuẩn bị bất ngờ cho bạn rồi! ❤️</p>
+    </div>
+
+    <canvas id="stars"></canvas>
+    <canvas id="matrix"></canvas>
+    <canvas id="heart3d"></canvas> <div id="countdown-clock">
+        <div style="font-size: 24px; opacity: 0.8; margin-bottom: 10px;">Ngày 30/01/2026</div>
+        <div id="clock-display">23:59:55</div>
+    </div>
+
     <div id="center-text"></div>
-    
+
     <div id="final-screen">
         <div class="card" id="birthday-card">
-            <h2 style="color: #d81b60; margin: 0;">Happy Birthday! 🎂</h2>
-            <img src="anh-cua-linh.jpg" class="avatar-img" alt="Yến Linh">
-            <div id="letter-content"></div>
-            <button class="btn" id="open-letter-btn">Mở thư chúc mừng 💖</button>
-            <button class="btn" id="go-to-heart" style="display:none;">Xem điều bất ngờ cuối cùng ✨</button>
+            <h1 class="neon-text" style="color:#d81b60; font-size: 35px; text-shadow: none;">Happy Birthday! 🎂</h1>
+            <img src="anh-cua-linh.jpg" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #ff69b4; margin: 15px auto; display: block;">
+            <div id="letter-content" style="text-align: left; margin: 15px 0; font-size: 15px; height: 120px; overflow-y: auto; color: #880e4f; border-top: 1px dashed #f06292; padding-top: 10px;"></div>
+            <button class="btn" id="open-btn">Mở thư tay 💌</button>
+            <button class="btn" id="show-heart-btn" style="display:none; background: #d81b60;">Xem ảnh bất ngờ ❤️</button>
+        </div>
+        <div id="heart-layout" style="display:none; flex-direction: column; align-items: center; padding: 20px;">
+            <div id="heart-grid" class="heart-grid"></div>
+            <h2 class="neon-text" style="margin-top: 30px; font-size: 40px; color: #ff69b4;">Yến Linh ❤️ I Love You!</h2>
         </div>
     </div>
 
-    <div id="heart-screen">
-        <div id="heart-container" class="heart-grid"></div>
-        <div style="font-family: 'Dancing Script', cursive; color: #d81b60; font-size: 45px; margin-top: 20px;">Yến Linh ❤️</div>
-    </div>
-    <canvas id="matrix"></canvas>
-
     <script>
-        const startBtn = document.getElementById('start-screen');
-        const loader = document.getElementById('loader-wrapper');
-        const clock = document.getElementById('countdown-clock');
-        const clockDisplay = document.getElementById('clock-display');
-        const centerText = document.getElementById('center-text');
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
-        const tickSound = new Audio('https://www.soundjay.com/buttons/beep-07a.mp3'); 
+        const chillMusic = new Audio('https://raw.githubusercontent.com/NguyenBaPhi/tich-hop-nhac/main/BeautifulInWhitePiano.mp3');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // --- ĐÃ THAY ĐỔI NHẠC NỀN HAPPY BIRTHDAY ---
-        // Sử dụng link nhạc ổn định từ github
-        const chillMusic = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'); 
-        chillMusic.loop = true;
-        chillMusic.volume = 0.7; // Giảm âm lượng một chút cho dễ chịu
+        // 1. Sao 3D
+        const starCanvas = document.getElementById('stars');
+        const sCtx = starCanvas.getContext('2d');
+        let stars = [], mouseX = 0, mouseY = 0;
 
-        // --- HÀM BẮN PHÁO GIẤY ---
-        function launchConfetti() {
-            var duration = 3 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999 };
-
-            function randomInRange(min, max) {
-            return Math.random() * (max - min) + min;
+        function initStars() {
+            starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight;
+            for(let i=0; i<300; i++) {
+                stars.push({x: Math.random()*starCanvas.width, y: Math.random()*starCanvas.height, size: Math.random()*1.8, z: Math.random()*starCanvas.width, opacity: Math.random(), blink: 0.02});
             }
-
-            var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-
-            if (timeLeft <= 0) {
-                return clearInterval(interval);
-            }
-
-            var particleCount = 50 * (timeLeft / duration);
-            // Bắn từ 2 bên góc
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
         }
 
-        startBtn.onclick = () => {
-            startBtn.style.display = 'none';
-            loader.style.display = 'flex';
-            setTimeout(startJourney, 2000);
-        };
-
-        function startJourney() {
-            loader.style.display = 'none';
-            clock.style.display = 'block';
-            let sec = 55;
-            const timer = setInterval(() => {
-                clockDisplay.innerText = `23:59:${sec}`;
-                tickSound.play();
-                if (sec === 59) { clearInterval(timer); setTimeout(triggerMatrixFlow, 1000); }
-                sec++;
-            }, 1000);
+        function drawStars() {
+            sCtx.fillStyle = "black"; sCtx.fillRect(0,0,starCanvas.width, starCanvas.height);
+            stars.forEach(s => {
+                let x = (s.x - starCanvas.width/2)*(starCanvas.width/s.z) + starCanvas.width/2 + (mouseX*0.05);
+                let y = (s.y - starCanvas.height/2)*(starCanvas.width/s.z) + starCanvas.height/2 + (mouseY*0.05);
+                let size = (starCanvas.width/s.z)*s.size;
+                s.opacity += s.blink; if(s.opacity > 1 || s.opacity < 0.3) s.blink = -s.blink;
+                sCtx.globalAlpha = s.opacity; sCtx.fillStyle = "#fff";
+                sCtx.beginPath(); sCtx.arc(x, y, size, 0, Math.PI*2); sCtx.fill();
+                s.z -= 1; if(s.z <= 0) s.z = starCanvas.width;
+            });
+            requestAnimationFrame(drawStars);
         }
 
-        let matrixInterval;
+        // 2. Matrix
+        const mCanvas = document.getElementById('matrix');
+        const mCtx = mCanvas.getContext('2d');
+        let mDrops = [];
         function startMatrix() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            const letters = "YENLINH31012009❤️HAPPYBIRTHDAY✨";
-            const fontSize = 18;
-            const columns = canvas.width / (fontSize - 2); 
-            const drops = Array(Math.floor(columns)).fill(1);
-            function draw() {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "#ff69b4"; ctx.font = fontSize + "px Courier New";
-                drops.forEach((y, i) => {
-                    const text = letters[Math.floor(Math.random() * letters.length)];
-                    ctx.fillText(text, i * (fontSize - 2), y * fontSize);
-                    if (y * fontSize > canvas.height && Math.random() > 0.95) drops[i] = 0;
-                    drops[i]++;
+            mCanvas.width = window.innerWidth; mCanvas.height = window.innerHeight;
+            mDrops = Array(Math.floor(mCanvas.width/20)).fill(1);
+            const chars = "YENLINH❤️💕✨💖🌸"; 
+            window.mInterval = setInterval(() => {
+                mCtx.fillStyle = "rgba(0,0,0,0.1)"; mCtx.fillRect(0,0,mCanvas.width, mCanvas.height);
+                mCtx.fillStyle = "#ff69b4"; mCtx.font = "20px Courier New";
+                mDrops.forEach((y, i) => {
+                    const txt = chars[Math.floor(Math.random()*chars.length)];
+                    mCtx.fillText(txt, i*20, y*20);
+                    if(y*20 > mCanvas.height && Math.random() > 0.975) mDrops[i] = 0;
+                    mDrops[i]++;
                 });
-            }
-            matrixInterval = setInterval(draw, 30);
+            }, 35);
         }
 
-        const show = (txt, dur) => new Promise(res => {
-            centerText.innerText = txt; centerText.style.opacity = 1;
-            setTimeout(() => { centerText.style.opacity = 0; setTimeout(res, 200); }, dur);
-        });
+        // 3. HIỆU ỨNG TRÁI TIM HẠT BỤI TỤ LẠI VÀ XOAY VÒNG TRÒN
+        const hCanvas = document.getElementById('heart3d');
+        const hCtx = hCanvas.getContext('2d');
+        let hParticles = [];
+        let hAnimationId;
 
-        async function triggerMatrixFlow() {
-            clock.style.display = 'none';
-            startMatrix();
-            chillMusic.play(); // Bắt đầu phát nhạc Happy Birthday
-            await show("3", 1000); await show("2", 1000); await show("1", 1000);
-            await show("HAPPY BIRTHDAY", 2000);
-            await show("YẾN LINH 🌸", 2000);
-            // Hiện ngày sinh
-    await show("31/01/2009", 2000); 
+        function showHeartParticle() {
+            return new Promise(resolve => {
+                hCanvas.style.display = 'block';
+                hCanvas.style.opacity = 1;
+                hCanvas.width = window.innerWidth;
+                hCanvas.height = window.innerHeight;
+                hParticles = [];
 
-    // Hiện Tuổi 17+ lung linh
-    centerText.innerHTML = '<span style="color: #ff69b4; font-size: 80px; text-shadow: 0 0 30px #ff69b4; font-family: \'Dancing Script\', cursive;">Tuổi 17+ ✨</span>';
-    centerText.style.opacity = 1;
-    await new Promise(res => setTimeout(res, 2000)); // Hiện trong 2 giây
-    centerText.style.opacity = 0;
-    await new Promise(res => setTimeout(res, 500)); // Nghỉ một chút trước khi sang màn hình thư
-            clearInterval(matrixInterval); canvas.style.display = 'none';
-            const fs = document.getElementById('final-screen'); fs.style.display = 'flex';
-            setTimeout(() => { 
-                fs.style.opacity = 1; 
-                document.getElementById('birthday-card').classList.add('show'); 
-                // KÍCH HOẠT BẮN PHÁO KHI HIỆN THIỆP
-                launchConfetti();
-            }, 100);
+                // Tạo hạt hình trái tim (Lưu vị trí tương đối)
+                for (let i = 0; i < 4000; i++) {
+                    let t = Math.random() * Math.PI * 2;
+                    let r = Math.random();
+                    // Công thức trái tim gốc
+                    let x = 16 * Math.pow(Math.sin(t), 3);
+                    let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    
+                    let scale = 15 + r * 10; 
+                    let hue = (t * 57 + r * 100) % 360; 
+
+                    // Lưu khoảng cách tương đối so với tâm trái tim
+                    let relX = x * scale;
+                    let relY = y * scale;
+
+                    hParticles.push({
+                        relX: relX,
+                        relY: relY,
+                        // Vị trí hiện tại (bắt đầu ngẫu nhiên)
+                        x: Math.random() * hCanvas.width,
+                        y: Math.random() * hCanvas.height,
+                        size: Math.random() * 2 + 0.5,
+                        color: `hsla(${hue}, 80%, 60%, 0.8)`,
+                        speed: 0.02 + Math.random() * 0.03
+                    });
+                }
+
+                let tick = 0;
+                function animateHeart() {
+                    hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
+                    tick++;
+
+                    // TÍNH TOÁN TÂM ĐỘNG (QUAY VÒNG TRÒN)
+                    const orbitRadius = 40; // Bán kính quay
+                    const orbitSpeed = 0.015; // Tốc độ quay
+                    const angle = tick * orbitSpeed;
+                    // Tâm hiện tại của trái tim đang di chuyển
+                    const currentHeartCX = (hCanvas.width / 2) + Math.cos(angle) * orbitRadius;
+                    const currentHeartCY = (hCanvas.height / 2 - 50) + Math.sin(angle) * orbitRadius;
+
+                    // 1. Vẽ các hạt trái tim di chuyển về đích động
+                    hParticles.forEach(p => {
+                        // Đích đến thay đổi theo tâm động
+                        const targetX = currentHeartCX + p.relX;
+                        const targetY = currentHeartCY + p.relY;
+
+                        const dx = targetX - p.x;
+                        const dy = targetY - p.y;
+                        
+                        // Di chuyển về đích
+                        p.x += dx * p.speed;
+                        p.y += dy * p.speed;
+                        
+                        // Rung nhẹ khi gần đích
+                        let jitterX = 0; let jitterY = 0;
+                        if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
+                             jitterX = (Math.random() - 0.5) * 2;
+                             jitterY = (Math.random() - 0.5) * 2;
+                        }
+
+                        hCtx.fillStyle = p.color;
+                        hCtx.beginPath();
+                        hCtx.arc(p.x + jitterX, p.y + jitterY, p.size, 0, Math.PI * 2);
+                        hCtx.fill();
+                    });
+
+                    // 2. Vẽ vòng tròn chữ cũng di chuyển theo tâm động
+                    const cx = currentHeartCX;
+                    const cy = currentHeartCY + 180; // Luôn ở dưới tâm trái tim
+                    const radiusX = 180; 
+                    const radiusY = 60;  
+                    const text = "MÃI YÊU YẾN LINH ";
+                    const angleStep = (Math.PI * 2) / text.length;
+
+                    hCtx.font = "bold 20px 'Courier New'";
+                    hCtx.textAlign = "center";
+                    hCtx.textBaseline = "middle";
+
+                    let rotationOffset = tick * 0.01; 
+
+                    for (let i = 0; i < text.length; i++) {
+                        let char = text[i];
+                        let textAngle = i * angleStep + rotationOffset;
+                        let tx = cx + Math.cos(textAngle) * radiusX;
+                        let ty = cy + Math.sin(textAngle) * radiusY;
+                        hCtx.fillStyle = `hsl(${(textAngle * 50) % 360}, 100%, 70%)`;
+                        hCtx.shadowColor = "#fff"; hCtx.shadowBlur = 10;
+                        hCtx.fillText(char, tx, ty);
+                        hCtx.shadowBlur = 0;
+                    }
+
+                    hAnimationId = requestAnimationFrame(animateHeart);
+                }
+                animateHeart();
+
+                setTimeout(() => {
+                    cancelAnimationFrame(hAnimationId);
+                    hCanvas.style.transition = "opacity 1s";
+                    hCanvas.style.opacity = 0;
+                    setTimeout(() => {
+                        hCanvas.style.display = 'none';
+                        resolve();
+                    }, 1000);
+                }, 8000); 
+            });
         }
 
-        const heartPattern = [0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0];
-        const container = document.getElementById('heart-container');
-        heartPattern.forEach(val => {
-            const div = document.createElement('div');
-            // Đảm bảo file ảnh linh.png có trong thư mục
-            if (val === 1) { div.className = 'photo'; div.innerHTML = '<img src="linh.png">'; }
-            else { div.className = 'empty'; }
-            container.appendChild(div);
-        });
+        // 4. Logic chính
+        document.getElementById('start-btn').onclick = function() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('loading-screen').style.display = 'flex';
 
-        function revealPhotosRandomly() {
-            let photos = Array.from(document.querySelectorAll('.photo'));
-            photos = photos.sort(() => Math.random() - 0.5);
-            photos.forEach((p, i) => { setTimeout(() => p.classList.add('reveal'), i * 400); });
-        }
-
-        document.getElementById('go-to-heart').onclick = () => {
-            document.getElementById('final-screen').style.display = 'none';
-            const hs = document.getElementById('heart-screen'); hs.style.display = 'flex';
-            setTimeout(() => { hs.style.opacity = 1; revealPhotosRandomly(); }, 50);
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                initStars(); drawStars();
+                startMatrix();
+                document.getElementById('countdown-clock').style.display = 'block';
+                
+                let sec = 55;
+                const timer = setInterval(() => {
+                    if(sec < 59) playSound(800, 0.05);
+                    else { playSound(1200, 0.2); clearInterval(timer); setTimeout(boom, 1000); }
+                    document.getElementById('clock-display').innerText = `23:59:${sec}`;
+                    sec++;
+                }, 1000);
+            }, 3000);
         };
 
-        const letterText = `Gửi Yến Linh,\n\nChúc mừng sinh nhật em! Tuổi mới thật rực rỡ và luôn mỉm cười nhé. 💖`;
-        let charIndex = 0;
-        function typeWriter() {
-            if (charIndex < letterText.length) {
-                document.getElementById('letter-content').innerHTML += letterText.charAt(charIndex);
-                charIndex++; setTimeout(typeWriter, 50);
-            } else { document.getElementById('go-to-heart').style.display = 'inline-block'; }
+        function playSound(f, d) {
+            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            o.frequency.value = f; g.gain.value = 0.1; o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime+d);
         }
-        document.getElementById('open-letter-btn').onclick = function() { 
-            this.style.display = 'none'; 
-            typeWriter(); 
+
+        async function boom() {
+            document.getElementById('countdown-clock').style.display = 'none';
+            const ct = document.getElementById('center-text');
+            const show = (t, cl, d) => new Promise(r => {
+                ct.innerHTML = `<h1 class="${cl}">${t}</h1>`; ct.style.opacity = 1;
+                setTimeout(() => { ct.style.opacity = 0; setTimeout(r, 400); }, d);
+            });
+            await show("3", "neon-text", 1200); await show("2", "neon-text", 1200); await show("1", "neon-text", 1200);
+            chillMusic.play();
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+            await show("HAPPY BIRTHDAY", "neon-text", 2100);
+            await show("YẾN LINH 🌸", "neon-text", 2100);
+            // --- THÊM NGÀY SINH TẠI ĐÂY ---
+            await show("31/01/2009", "neon-text", 2100);
+            // ------------------------------
+            await show("Tuổi 17+", "age-text", 2100);
+            
+            mCanvas.style.display = 'none'; clearInterval(window.mInterval);
+            await showHeartParticle(); 
+            
+            document.getElementById('final-screen').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('final-screen').style.opacity = 1;
+                document.getElementById('birthday-card').classList.add('show');
+                setInterval(() => {
+                    confetti({ particleCount: 40, angle: 60, spread: 55, origin: { x: 0 } });
+                    confetti({ particleCount: 40, angle: 120, spread: 55, origin: { x: 1 } });
+                }, 2000);
+            }, 500);
+        }
+
+const letter = "Gửi Yến Linh nè,\n\nChúc mừng sinh nhật em nhé! Chẳng biết nói gì hơn, anh chỉ mong em mỗi ngày đều vui vẻ, ăn ngon, ngủ ngon và đừng có hay dỗi anh nữa. \n\nAnh biết anh đôi khi hơi ngốc, nhưng mà thương em là thật lòng nhất đấy. Thế nên hôm nay sinh nhật, em cứ việc vui thôi, còn cả thế giới để anh lo cũng được. Mà này, nhớ thương anh nhiều hơn một xíu nhé, không là anh dỗi ngược lại đấy! ✨\n\nChúc em một ngày thật bình yên bên cạnh anh. Thương em nhất! ❤️";
+            this.style.display = 'none';
+            let i = 0;
+            const type = () => {
+                if(i < letter.length) {
+                    document.getElementById('letter-content').innerHTML += letter.charAt(i) === '\n' ? '<br>' : letter.charAt(i);
+                    i++; setTimeout(type, 40);
+                } else document.getElementById('show-heart-btn').style.display = 'inline-block';
+            };
+            type();
+        };
+
+        const heartMap = [0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0];
+        const grid = document.getElementById('heart-grid');
+        heartMap.forEach(v => {
+            const d = document.createElement('div');
+            if(v) { d.className = 'photo-slot'; d.innerHTML = `<img src="linh.png">`; }
+            grid.appendChild(d);
+        });
+
+        document.getElementById('show-heart-btn').onclick = () => {
+            document.getElementById('birthday-card').style.display = 'none';
+            document.getElementById('heart-layout').style.display = 'flex';
+            document.querySelectorAll('.photo-slot').forEach((s, i) => setTimeout(() => s.classList.add('reveal'), i*150));
+        };
+
+        window.onmousemove = e => {
+            mouseX = e.clientX - window.innerWidth/2; mouseY = e.clientY - window.innerHeight/2;
+            const s = document.createElement('div'); s.className = 'sparkle';
+            s.style.left = e.pageX+'px'; s.style.top = e.pageY+'px';
+            document.body.appendChild(s); setTimeout(() => s.remove(), 1000);
         };
     </script>
 </body>
