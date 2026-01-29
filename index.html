@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Yến Linh</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Arial', sans-serif; color: white; }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; display: flex; justify-content: center; align-items: center; z-index: 200; cursor: pointer; }
+        #loader-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .loader { border: 5px solid #333; border-top: 5px solid #ff69b4; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #countdown-clock { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; text-align: center; z-index: 10; display: none; color: #ff69b4; text-shadow: 0 0 20px #ff69b4; font-family: 'Courier New', monospace; }
+        #center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: bold; z-index: 15; text-align: center; opacity: 0; color: #ff69b4; text-shadow: 0 0 20px #ff69b4; pointer-events: none; }
+        #final-screen, #heart-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fce4ec; flex-direction: column; justify-content: center; align-items: center; z-index: 20; opacity: 0; transition: opacity 1s; }
+        
+        /* CSS CARD VÀ ẢNH TRÒN */
+        .card { background: white; padding: 25px; border-radius: 20px; color: #880e4f; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 4px solid #f06292; max-width: 400px; width: 85%; text-align: center; transform: scale(0.8); transition: 0.6s; z-index: 25;}
+        .card.show { opacity: 1; transform: scale(1); }
+        .avatar-img {
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover; 
+            border: 3px solid #ff69b4; margin: 15px auto; display: block; 
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        #letter-content { white-space: pre-wrap; text-align: left; height: 150px; overflow-y: auto; border-top: 1px dashed #f06292; padding-top: 10px; color: #880e4f; margin-top: 10px;}
+        .heart-grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 8px; }
+        .photo { width: 60px; height: 60px; border-radius: 8px; overflow: hidden; border: 2px solid #f06292; opacity: 0; transition: 0.5s; background: #eee; display: flex; align-items: center; justify-content: center; }
+        .photo img { width: 100%; height: 100%; object-fit: cover; }
+        .photo.reveal { opacity: 1; }
+        .empty { width: 60px; height: 60px; }
+        .btn { background: #f06292; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div id="start-screen"><div class="btn" style="font-size: 20px;">🌸 Chạm để bắt đầu hành trình dành riêng cho Yến Linh 🌸</div></div>
+    <div id="loader-wrapper"><div class="loader"></div><div style="color:#ff69b4; margin-top:10px;">LOADING...</div></div>
+    <div id="countdown-clock"><div style="font-size: 24px; margin-bottom: 10px;">Ngày 30/01/2026</div><div id="clock-display">23:59:55</div></div>
+    <div id="center-text"></div>
+    
+    <div id="final-screen">
+        <div class="card" id="birthday-card">
+            <h2 style="color: #d81b60; margin: 0;">Happy Birthday! 🎂</h2>
+            <img src="anh-cua-linh.jpg" class="avatar-img" alt="Yến Linh">
+            <div id="letter-content"></div>
+            <button class="btn" id="open-letter-btn">Mở thư chúc mừng 💖</button>
+            <button class="btn" id="go-to-heart" style="display:none;">Xem điều bất ngờ cuối cùng ✨</button>
+        </div>
+    </div>
+
+    <div id="heart-screen">
+        <div id="heart-container" class="heart-grid"></div>
+        <div style="font-family: 'Dancing Script', cursive; color: #d81b60; font-size: 45px; margin-top: 20px;">Yến Linh ❤️</div>
+    </div>
+    <canvas id="matrix"></canvas>
+
+    <script>
+        const startBtn = document.getElementById('start-screen');
+        const loader = document.getElementById('loader-wrapper');
+        const clock = document.getElementById('countdown-clock');
+        const clockDisplay = document.getElementById('clock-display');
+        const centerText = document.getElementById('center-text');
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        const tickSound = new Audio('https://www.soundjay.com/buttons/beep-07a.mp3'); 
+        
+        // --- ĐÃ THAY ĐỔI NHẠC NỀN HAPPY BIRTHDAY ---
+        // Sử dụng link nhạc ổn định từ github
+        const chillMusic = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'); 
+        chillMusic.loop = true;
+        chillMusic.volume = 0.7; // Giảm âm lượng một chút cho dễ chịu
+
+        // --- HÀM BẮN PHÁO GIẤY ---
+        function launchConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999 };
+
+            function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            var particleCount = 50 * (timeLeft / duration);
+            // Bắn từ 2 bên góc
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        startBtn.onclick = () => {
+            startBtn.style.display = 'none';
+            loader.style.display = 'flex';
+            setTimeout(startJourney, 2000);
+        };
+
+        function startJourney() {
+            loader.style.display = 'none';
+            clock.style.display = 'block';
+            let sec = 55;
+            const timer = setInterval(() => {
+                clockDisplay.innerText = `23:59:${sec}`;
+                tickSound.play();
+                if (sec === 59) { clearInterval(timer); setTimeout(triggerMatrixFlow, 1000); }
+                sec++;
+            }, 1000);
+        }
+
+        let matrixInterval;
+        function startMatrix() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const letters = "YENLINH31012009❤️HAPPYBIRTHDAY✨";
+            const fontSize = 18;
+            const columns = canvas.width / (fontSize - 2); 
+            const drops = Array(Math.floor(columns)).fill(1);
+            function draw() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#ff69b4"; ctx.font = fontSize + "px Courier New";
+                drops.forEach((y, i) => {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    ctx.fillText(text, i * (fontSize - 2), y * fontSize);
+                    if (y * fontSize > canvas.height && Math.random() > 0.95) drops[i] = 0;
+                    drops[i]++;
+                });
+            }
+            matrixInterval = setInterval(draw, 30);
+        }
+
+        const show = (txt, dur) => new Promise(res => {
+            centerText.innerText = txt; centerText.style.opacity = 1;
+            setTimeout(() => { centerText.style.opacity = 0; setTimeout(res, 200); }, dur);
+        });
+
+        async function triggerMatrixFlow() {
+            clock.style.display = 'none';
+            startMatrix();
+            chillMusic.play(); // Bắt đầu phát nhạc Happy Birthday
+            await show("3", 1000); await show("2", 1000); await show("1", 1000);
+            await show("HAPPY BIRTHDAY", 2000);
+            await show("YẾN LINH 🌸", 2000);
+            // Hiện ngày sinh
+    await show("31/01/2009", 2000); 
+
+    // Hiện Tuổi 17+ lung linh
+    centerText.innerHTML = '<span style="color: #ff69b4; font-size: 80px; text-shadow: 0 0 30px #ff69b4; font-family: \'Dancing Script\', cursive;">Tuổi 17+ ✨</span>';
+    centerText.style.opacity = 1;
+    await new Promise(res => setTimeout(res, 2000)); // Hiện trong 2 giây
+    centerText.style.opacity = 0;
+    await new Promise(res => setTimeout(res, 500)); // Nghỉ một chút trước khi sang màn hình thư
+            clearInterval(matrixInterval); canvas.style.display = 'none';
+            const fs = document.getElementById('final-screen'); fs.style.display = 'flex';
+            setTimeout(() => { 
+                fs.style.opacity = 1; 
+                document.getElementById('birthday-card').classList.add('show'); 
+                // KÍCH HOẠT BẮN PHÁO KHI HIỆN THIỆP
+                launchConfetti();
+            }, 100);
+        }
+
+        const heartPattern = [0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0];
+        const container = document.getElementById('heart-container');
+        heartPattern.forEach(val => {
+            const div = document.createElement('div');
+            // Đảm bảo file ảnh linh.png có trong thư mục
+            if (val === 1) { div.className = 'photo'; div.innerHTML = '<img src="linh.png">'; }
+            else { div.className = 'empty'; }
+            container.appendChild(div);
+        });
+
+        function revealPhotosRandomly() {
+            let photos = Array.from(document.querySelectorAll('.photo'));
+            photos = photos.sort(() => Math.random() - 0.5);
+            photos.forEach((p, i) => { setTimeout(() => p.classList.add('reveal'), i * 400); });
+        }
+
+        document.getElementById('go-to-heart').onclick = () => {
+            document.getElementById('final-screen').style.display = 'none';
+            const hs = document.getElementById('heart-screen'); hs.style.display = 'flex';
+            setTimeout(() => { hs.style.opacity = 1; revealPhotosRandomly(); }, 50);
+        };
+
+        const letterText = `Gửi Yến Linh,\n\nChúc mừng sinh nhật em! Tuổi mới thật rực rỡ và luôn mỉm cười nhé. 💖`;
+        let charIndex = 0;
+        function typeWriter() {
+            if (charIndex < letterText.length) {
+                document.getElementById('letter-content').innerHTML += letterText.charAt(charIndex);
+                charIndex++; setTimeout(typeWriter, 50);
+            } else { document.getElementById('go-to-heart').style.display = 'inline-block'; }
+        }
+        document.getElementById('open-letter-btn').onclick = function() { 
+            this.style.display = 'none'; 
+            typeWriter(); 
+        };
+    </script>
+</body>
+</html>
