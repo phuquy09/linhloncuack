@@ -9,46 +9,26 @@
     <style>
         body { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Quicksand', sans-serif; color: white; cursor: crosshair; }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
-        
-        #heart3d { z-index: 150; display: none; width: 100%; height: 100%; } /* Canvas cho trái tim hạt */
-
+        #heart3d { z-index: 150; display: none; width: 100%; height: 100%; }
         #start-screen { position: fixed; inset: 0; background: black; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        
-        #loading-screen {
-            position: fixed; inset: 0; background: #0a000f; display: none; 
-            flex-direction: column; justify-content: center; align-items: center; z-index: 10000;
-        }
-        .spinner {
-            border: 6px solid rgba(255, 105, 180, 0.2);
-            border-top: 6px solid #ff69b4;
-            border-radius: 50%;
-            width: 50px; height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
+        #loading-screen { position: fixed; inset: 0; background: #0a000f; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; }
+        .spinner { border: 6px solid rgba(255, 105, 180, 0.2); border-top: 6px solid #ff69b4; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
         .neon-text { font-family: 'Dancing Script', cursive; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ff69b4, 0 0 40px #ff69b4; animation: pulse 1.5s infinite alternate; text-align: center; }
         @keyframes pulse { 100% { text-shadow: 0 0 5px #fff, 0 0 15px #fff, 0 0 30px #ff1493, 0 0 60px #ff1493; } }
-        
         .age-text { background: linear-gradient(to right, #ff69b4, #fff, #ffeb3b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 100px !important; filter: drop-shadow(0 0 20px #ffeb3b); animation: zoom 2s infinite; font-family: 'Dancing Script', cursive; }
         @keyframes zoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
         #countdown-clock { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; z-index: 100; color: #ff69b4; font-family: 'Courier New', monospace; text-align: center; display: none; }
         #center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 101; text-align: center; opacity: 0; width: 100%; transition: 0.5s; }
-        
         #final-screen { display: none; position: fixed; inset: 0; background: #0a000f; z-index: 200; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 2s; }
         .card { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 30px; color: #880e4f; box-shadow: 0 0 30px #ff69b4; text-align: center; width: 380px; transform: scale(0.5); transition: 1s; }
         .card.show { transform: scale(1); }
-        
         .btn { background: #f06292; color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 20px; font-family: 'Quicksand'; transition: 0.3s; }
         .btn:hover { background: #d81b60; transform: scale(1.05); }
-
         .heart-grid { display: grid; grid-template-columns: repeat(5, 75px); gap: 10px; margin-top: 20px; }
         .photo-slot { width: 75px; height: 75px; border-radius: 12px; overflow: hidden; border: 2px solid #ff69b4; opacity: 0; transform: scale(0); transition: 0.5s; }
         .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
         .photo-slot.reveal { opacity: 1; transform: scale(1); }
-        
         .sparkle { position: absolute; width: 6px; height: 6px; background: #ff69b4; border-radius: 50%; pointer-events: none; z-index: 10000; animation: fadeOut 1s forwards; }
         @keyframes fadeOut { 100% { transform: scale(0); opacity: 0; } }
     </style>
@@ -67,7 +47,9 @@
 
     <canvas id="stars"></canvas>
     <canvas id="matrix"></canvas>
-    <canvas id="heart3d"></canvas> <div id="countdown-clock">
+    <canvas id="heart3d"></canvas>
+    
+    <div id="countdown-clock">
         <div style="font-size: 24px; opacity: 0.8; margin-bottom: 10px;">Ngày 30/01/2026</div>
         <div id="clock-display">23:59:55</div>
     </div>
@@ -92,10 +74,9 @@
         const chillMusic = new Audio('https://raw.githubusercontent.com/NguyenBaPhi/tich-hop-nhac/main/BeautifulInWhitePiano.mp3');
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // 1. Sao 3D
+        let stars = [], mouseX = 0, mouseY = 0;
         const starCanvas = document.getElementById('stars');
         const sCtx = starCanvas.getContext('2d');
-        let stars = [], mouseX = 0, mouseY = 0;
 
         function initStars() {
             starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight;
@@ -118,7 +99,6 @@
             requestAnimationFrame(drawStars);
         }
 
-        // 2. Matrix
         const mCanvas = document.getElementById('matrix');
         const mCtx = mCanvas.getContext('2d');
         let mDrops = [];
@@ -138,7 +118,6 @@
             }, 35);
         }
 
-        // 3. HIỆU ỨNG TRÁI TIM HẠT BỤI TỤ LẠI VÀ XOAY VÒNG TRÒN
         const hCanvas = document.getElementById('heart3d');
         const hCtx = hCanvas.getContext('2d');
         let hParticles = [];
@@ -151,126 +130,49 @@
                 hCanvas.width = window.innerWidth;
                 hCanvas.height = window.innerHeight;
                 hParticles = [];
-
-                // Tạo hạt hình trái tim (Lưu vị trí tương đối)
                 for (let i = 0; i < 4000; i++) {
                     let t = Math.random() * Math.PI * 2;
                     let r = Math.random();
-                    // Công thức trái tim gốc
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                    
                     let scale = 15 + r * 10; 
                     let hue = (t * 57 + r * 100) % 360; 
-
-                    // Lưu khoảng cách tương đối so với tâm trái tim
-                    let relX = x * scale;
-                    let relY = y * scale;
-
-                    hParticles.push({
-                        relX: relX,
-                        relY: relY,
-                        // Vị trí hiện tại (bắt đầu ngẫu nhiên)
-                        x: Math.random() * hCanvas.width,
-                        y: Math.random() * hCanvas.height,
-                        size: Math.random() * 2 + 0.5,
-                        color: `hsla(${hue}, 80%, 60%, 0.8)`,
-                        speed: 0.02 + Math.random() * 0.03
-                    });
+                    hParticles.push({ relX: x * scale, relY: y * scale, x: Math.random() * hCanvas.width, y: Math.random() * hCanvas.height, size: Math.random() * 2 + 0.5, color: `hsla(${hue}, 80%, 60%, 0.8)`, speed: 0.02 + Math.random() * 0.03 });
                 }
-
                 let tick = 0;
                 function animateHeart() {
                     hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
                     tick++;
-
-                    // TÍNH TOÁN TÂM ĐỘNG (QUAY VÒNG TRÒN)
-                    const orbitRadius = 40; // Bán kính quay
-                    const orbitSpeed = 0.015; // Tốc độ quay
-                    const angle = tick * orbitSpeed;
-                    // Tâm hiện tại của trái tim đang di chuyển
-                    const currentHeartCX = (hCanvas.width / 2) + Math.cos(angle) * orbitRadius;
-                    const currentHeartCY = (hCanvas.height / 2 - 50) + Math.sin(angle) * orbitRadius;
-
-                    // 1. Vẽ các hạt trái tim di chuyển về đích động
+                    const orbitRadius = 40; const orbitSpeed = 0.015; const angle = tick * orbitSpeed;
+                    const currentCX = (hCanvas.width / 2) + Math.cos(angle) * orbitRadius;
+                    const currentCY = (hCanvas.height / 2 - 50) + Math.sin(angle) * orbitRadius;
                     hParticles.forEach(p => {
-                        // Đích đến thay đổi theo tâm động
-                        const targetX = currentHeartCX + p.relX;
-                        const targetY = currentHeartCY + p.relY;
-
-                        const dx = targetX - p.x;
-                        const dy = targetY - p.y;
-                        
-                        // Di chuyển về đích
-                        p.x += dx * p.speed;
-                        p.y += dy * p.speed;
-                        
-                        // Rung nhẹ khi gần đích
-                        let jitterX = 0; let jitterY = 0;
-                        if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
-                             jitterX = (Math.random() - 0.5) * 2;
-                             jitterY = (Math.random() - 0.5) * 2;
-                        }
-
-                        hCtx.fillStyle = p.color;
-                        hCtx.beginPath();
-                        hCtx.arc(p.x + jitterX, p.y + jitterY, p.size, 0, Math.PI * 2);
-                        hCtx.fill();
+                        const targetX = currentCX + p.relX; const targetY = currentCY + p.relY;
+                        p.x += (targetX - p.x) * p.speed; p.y += (targetY - p.y) * p.speed;
+                        hCtx.fillStyle = p.color; hCtx.beginPath(); hCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); hCtx.fill();
                     });
-
-                    // 2. Vẽ vòng tròn chữ cũng di chuyển theo tâm động
-                    const cx = currentHeartCX;
-                    const cy = currentHeartCY + 180; // Luôn ở dưới tâm trái tim
-                    const radiusX = 180; 
-                    const radiusY = 60;  
-                    const text = "MÃI YÊU YẾN LINH ";
-                    const angleStep = (Math.PI * 2) / text.length;
-
-                    hCtx.font = "bold 20px 'Courier New'";
-                    hCtx.textAlign = "center";
-                    hCtx.textBaseline = "middle";
-
-                    let rotationOffset = tick * 0.01; 
-
+                    const text = "MÃI YÊU YẾN LINH "; const angleStep = (Math.PI * 2) / text.length;
+                    hCtx.font = "bold 20px 'Courier New'"; hCtx.textAlign = "center";
                     for (let i = 0; i < text.length; i++) {
-                        let char = text[i];
-                        let textAngle = i * angleStep + rotationOffset;
-                        let tx = cx + Math.cos(textAngle) * radiusX;
-                        let ty = cy + Math.sin(textAngle) * radiusY;
-                        hCtx.fillStyle = `hsl(${(textAngle * 50) % 360}, 100%, 70%)`;
-                        hCtx.shadowColor = "#fff"; hCtx.shadowBlur = 10;
-                        hCtx.fillText(char, tx, ty);
-                        hCtx.shadowBlur = 0;
+                        let textAngle = i * angleStep + tick * 0.01;
+                        let tx = currentCX + Math.cos(textAngle) * 180; let ty = (currentCY + 180) + Math.sin(textAngle) * 60;
+                        hCtx.fillStyle = `hsl(${(textAngle * 50) % 360}, 100%, 70%)`; hCtx.fillText(text[i], tx, ty);
                     }
-
                     hAnimationId = requestAnimationFrame(animateHeart);
                 }
                 animateHeart();
-
-                setTimeout(() => {
-                    cancelAnimationFrame(hAnimationId);
-                    hCanvas.style.transition = "opacity 1s";
-                    hCanvas.style.opacity = 0;
-                    setTimeout(() => {
-                        hCanvas.style.display = 'none';
-                        resolve();
-                    }, 1000);
-                }, 8000); 
+                setTimeout(() => { cancelAnimationFrame(hAnimationId); hCanvas.style.transition = "opacity 1s"; hCanvas.style.opacity = 0; setTimeout(() => { hCanvas.style.display = 'none'; resolve(); }, 1000); }, 8000); 
             });
         }
 
-        // 4. Logic chính
         document.getElementById('start-btn').onclick = function() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('loading-screen').style.display = 'flex';
-
             setTimeout(() => {
                 document.getElementById('loading-screen').style.display = 'none';
-                initStars(); drawStars();
-                startMatrix();
+                initStars(); drawStars(); startMatrix();
                 document.getElementById('countdown-clock').style.display = 'block';
-                
                 let sec = 55;
                 const timer = setInterval(() => {
                     if(sec < 59) playSound(800, 0.05);
@@ -294,19 +196,15 @@
                 ct.innerHTML = `<h1 class="${cl}">${t}</h1>`; ct.style.opacity = 1;
                 setTimeout(() => { ct.style.opacity = 0; setTimeout(r, 400); }, d);
             });
-            await show("3", "neon-text", 1200); await show("2", "neon-text", 1200); await show("1", "neon-text", 1200);
+            await show("3", "neon-text", 1000); await show("2", "neon-text", 1000); await show("1", "neon-text", 1000);
             chillMusic.play();
             confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-            await show("HAPPY BIRTHDAY", "neon-text", 2100);
-            await show("YẾN LINH 🌸", "neon-text", 2100);
-            // --- THÊM NGÀY SINH TẠI ĐÂY ---
-            await show("31/01/2009", "neon-text", 2100);
-            // ------------------------------
-            await show("Tuổi 17+", "age-text", 2100);
-            
+            await show("HAPPY BIRTHDAY", "neon-text", 2000);
+            await show("YẾN LINH 🌸", "neon-text", 2000);
+            await show("31/01/2009", "neon-text", 2000);
+            await show("Tuổi 17+", "age-text", 2000);
             mCanvas.style.display = 'none'; clearInterval(window.mInterval);
             await showHeartParticle(); 
-            
             document.getElementById('final-screen').style.display = 'flex';
             setTimeout(() => {
                 document.getElementById('final-screen').style.opacity = 1;
@@ -318,7 +216,9 @@
             }, 500);
         }
 
-const letter = "Gửi Yến Linh nè,\n\nChúc mừng sinh nhật em nhé! Chẳng biết nói gì hơn, anh chỉ mong em mỗi ngày đều vui vẻ, ăn ngon, ngủ ngon và đừng có hay dỗi anh nữa. \n\nAnh biết anh đôi khi hơi ngốc, nhưng mà thương em là thật lòng nhất đấy. Thế nên hôm nay sinh nhật, em cứ việc vui thôi, còn cả thế giới để anh lo cũng được. Mà này, nhớ thương anh nhiều hơn một xíu nhé, không là anh dỗi ngược lại đấy! ✨\n\nChúc em một ngày thật bình yên bên cạnh anh. Thương em nhất! ❤️";
+        const letter = "Gửi Yến Linh nè,\n\nChúc mừng sinh nhật em nhé! Chẳng biết nói gì hơn, anh chỉ mong em mỗi ngày đều vui vẻ, ăn ngon, ngủ ngon và đừng có hay dỗi anh nữa. \n\nAnh biết anh đôi khi hơi ngốc, nhưng mà thương em là thật lòng nhất đấy. Thế nên hôm nay sinh nhật, em cứ việc vui thôi, còn cả thế giới để anh lo cũng được. Mà này, nhớ thương anh nhiều hơn một xíu nhé, không là anh dỗi ngược lại đấy! ✨\n\nChúc em một ngày thật bình yên bên cạnh anh. Thương em nhất! ❤️";
+
+        document.getElementById('open-btn').onclick = function() {
             this.style.display = 'none';
             let i = 0;
             const type = () => {
